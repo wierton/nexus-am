@@ -1,7 +1,11 @@
 OBJ_DIR = build
 SRCS = $(shell find src/ -name "*.S")
 OBJS = $(patsubst %.S, $(OBJ_DIR)/%.o, $(SRCS))
-APP = $(OBJ_DIR)/insttest
+APP = $(OBJ_DIR)/insttest-$(ARCH)
+
+ifneq ($(ARCH),mips32-npc)
+$(error "The only allowed arch is mips32-npc")
+endif
 
 CFLAGS := -D_KERNEL -fno-builtin -nostdinc -nostdlib
 CFLAGS += -EL -O2 -mno-abicalls -g -Iinclude -I.
