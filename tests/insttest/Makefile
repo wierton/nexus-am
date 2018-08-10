@@ -27,7 +27,7 @@ $(APP): $(OBJ_DIR)/src/start.o $(filter-out $(OBJ_DIR)/src/start.o,$(OBJS))
 	@mips-linux-gnu-objdump -D $@ > $@.S
 	@echo + $@.S
 	@truncate -s %8 $@.bin
-	@hexdump -ve '2/ "%08x " "\n"' $@.bin | awk '{print $2$1}' > $@.bin.txt
+	@hexdump -ve '2/ "%08x " "\n"' $@.bin | awk '{print $$2$$1}' > $@.bin.txt
 	@echo + $@.bin.txt
 
 clean:
