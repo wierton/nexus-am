@@ -2,7 +2,7 @@
 #include <regdef.h>
 #include <cpu_cde.h>
 
-#define TEST_NUM 91
+#define TEST_NUM 92
 
 #define EXT_8TO16(t2, t3) \
 
@@ -421,6 +421,8 @@ inst_test:
     jal n90_branch_prediction   #branch prediction
     nop
     jal n91_ds_cache_miss       #ds_cache_miss
+    nop
+    jal n92_cache_flush         #cache flush instr
     nop
 
 test_end:
