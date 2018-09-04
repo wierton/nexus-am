@@ -16,8 +16,10 @@ all: $(APP)
 
 $(OBJ_DIR)/%.o: %.S
 	@mkdir -p $(@D)
-	@mips-linux-gnu-gcc $(CFLAGS) -c $< -o $@
+	@mips-linux-gnu-gcc -MMD $(CFLAGS) -c $< -o $@
 	@echo + $<
+
+-include $(OBJS:.o=.d)
 
 $(APP): $(OBJ_DIR)/src/start.o $(filter-out $(OBJ_DIR)/src/start.o,$(OBJS))
 	@echo + $@

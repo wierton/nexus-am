@@ -17,10 +17,101 @@ _start:
 	j main
 	nop
 
+tlb_ex_entry:
+la k0, tlb_refill_ex
+jr k0
+nop
+tlb_ex_entry_end:
+
+usual_ex_entry:
+la k0, exception_vector_entry
+jr k0
+nop
+usual_ex_entry_end:
+
+intr_ex_entry:
+la k0, exception_vector_entry
+jr k0
+nop
+intr_ex_entry_end:
+
+# a1: st, a1:ed, a2:target
+setup_handler:
+	sltu    v0,a0,a1
+	beqz    v0,2f
+1:	nop
+	lw      v1,0(a0)
+	sw      v1,0(a2)
+	addiu   a0,a0,4
+	addiu   a2,a2,4
+	bltu    a0,a1, 1b
+	nop
+2:	jr      ra
+	nop
+	nop
+
 /*
  *  exception handle
  */
-.org 0x20
+tlb_refill_ex:
+    lui v1, 0xffe8
+    ori v1, 0xdc03
+    beq v0, v1, tlbwr_ex
+    nop
+    lui v1, 0xefe8
+    ori v1, 0xdc03
+    beq v0, v1, tlbwi_ex
+    nop
+
+tlbwr_ex:
+    li v1, 0x1
+    beq k0, v1, tlbwr_allbit
+    nop
+    li v1, 0x3
+    beq k0, v1, tlbwr_asid
+    nop
+    addiu t0, 0x0001
+    addiu t1, 0x0001
+    addiu k0, 0x0001
+    j tlbwr_return
+    nop
+tlbwr_allbit:
+    ori t0, 0x7
+    ori t1, 0x7
+    j tlbwr_return
+    nop
+tlbwr_asid:
+    j tlbwr_return
+    nop
+tlbwr_return:
+    mtc0 s0, c0_entryhi
+    mtc0 t0, c0_entrylo0
+    mtc0 t1, c0_entrylo1
+    tlbwr
+    lui v1, 0xed08
+    ori v1, 0xdc15
+    add v1, v1, k0
+    .set mips32
+    eret
+    .set mips1
+tlbwi_ex:
+    mfc0 v1, c0_badvaddr
+    lui a1, 0xffff
+    ori a1, 0xe000
+    and v1, a1, v1
+    mtc0 v1, c0_entryhi
+    li v1, 0x4007
+    mtc0 v1, c0_entrylo0
+    li v1, 0x4007
+    mtc0 v1, c0_entrylo1
+    tlbwi
+    lui v1, 0xed12
+    ori v1, 0x5678
+    .set mips32
+    eret
+    .set mips1
+    nop
+
 exception_vector_entry:
     mfhi k0
     mflo k1
@@ -232,9 +323,38 @@ ex_ret:
     .set mips1
     nop
 	b    inst_error
+	nop
 
 main:
 	.set noreorder
+
+#   setup tlbrefill exception handler
+	la a0, tlb_ex_entry
+	la a1, tlb_ex_entry_end
+	li a2, 0xbfc00000
+	jal setup_handler
+	nop
+
+#   setup usual exception handler
+	la a0, usual_ex_entry
+	la a1, usual_ex_entry_end
+	li a2, 0xbfc00180
+	jal setup_handler
+	nop
+
+#   setup usual exception handler for loongson
+	la a0, usual_ex_entry
+	la a1, usual_ex_entry_end
+	li a2, 0xbfc00380
+	jal setup_handler
+	nop
+
+#   setup intr exception handler
+	la a0, intr_ex_entry
+	la a1, intr_ex_entry_end
+	li a2, 0xbfc00200
+	jal setup_handler
+	nop
 
     lui s0, 0          ## initial run number
 	li  s3, 0
@@ -431,14 +551,14 @@ test_end:
     nop
 
 	li k0, 0
-	lui v0,0x4000
+	li v0, GPIO_ADDR
 	sb  k0,0(v0)
 1:  b 1b
 	nop
 
 inst_error:
 	li k0, 1
-	lui v0,0x4000
+	li v0, GPIO_ADDR
 	sb  k0,0(v0)
 1:  b 1b
 	nop
