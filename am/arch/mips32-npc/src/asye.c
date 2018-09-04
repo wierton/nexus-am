@@ -5,6 +5,7 @@
 
 static _RegSet* (*H) (_Event, _RegSet*) = NULL;
 
+#if 0
 void print_timer() {
   int compare = 0;
   MFC0(compare, CP0_COMPARE, 0);
@@ -14,6 +15,7 @@ void print_timer() {
   MFC0(count1, CP0_COUNT, 1);
   printk("\e[33m[AM]\e[0m: compare:%d, count0:%d, count1:%d\n", compare, count0, count1);
 }
+#endif
 
 void update_timer(uint32_t step) {
   uint32_t compare = 0;
@@ -29,8 +31,21 @@ static void init_timer(int step) {
   MTC0(CP0_COMPARE, compare, 0);
 }
 
+void set_handler(unsigned offset, void *addr, int size) {
+  uint8_t *dst = (void *)(EBASE + offset);
+  for(int i = 0; i < size; i++) {
+	dst[i] = ((uint8_t*)addr)[i];
+  }
+}
+
 int _asye_init(_RegSet* (*l)(_Event ev, _RegSet *regs)){
-  H = l;
+  H = l; // set asye handler
+
+  extern int _ex_entry, _ex_entry_size;
+  set_handler(0x000, &_ex_entry, _ex_entry_size); // TLB
+  set_handler(0x180, &_ex_entry, _ex_entry_size); // EXCEPTION
+  set_handler(0x200, &_ex_entry, _ex_entry_size); // INTR
+  set_handler(0x380, &_ex_entry, _ex_entry_size); // LOONGSON
   return 0;
 }
 
@@ -39,7 +54,7 @@ _RegSet *_make(_Area kstack, void (*entry)(void *), void *args){
   regs->sp = (uint32_t) kstack.end;
   regs->epc = (uint32_t) entry;
 
-  static const char *envp[] = { "FUCKYOU=true", NULL };
+  static const char *envp[] = { "AM=true", NULL };
 
   uintptr_t *arg = args;
   regs->a0 = 0;
@@ -72,9 +87,6 @@ void irq_handle(struct _RegSet *regs){
   uint32_t exccode = cause->ExcCode;
   uint32_t ipcode = cause->IP;
   
-  // print_timer();
-  // printk("[AM] cause:%x, status:%x, code:%x, ip:%x\n", regs->cause, regs->status, exccode, ipcode);
-
   _Event ev;
   ev.event = _EVENT_NULL;
   //TODO: exception handling
@@ -109,26 +121,14 @@ void irq_handle(struct _RegSet *regs){
     case EXC_OV:
     default:
 	  printk("unhandled exccode = %x, epc:%08x, badvaddr:%08x\n", exccode, regs->epc, regs->badvaddr);
-	  printk("cp0: base:%08x, cause:%08x, status:%08x\n", regs->base, regs->cause, regs->status);
 	  _halt(-1);
   }
 
-  // printf("regs: t0:%x, t1:%x, t2:%x, t3:%x\n", regs->t0, regs->t1, regs->t2, regs->t3);
   _RegSet *ret = regs;
   if(H) {
 	  _RegSet *next = H(ev, regs);
 	  if(next != NULL) ret = next;
   }
-  /*
-  printk("======================\n");
-  int count0 = 0;
-  MFC0(count0, CP0_COUNT, 0);
-  while(count0 > 0) {
-	_putc(count0 % 10 + '0');
-	count0 /= 10;
-  }
-  _putc('\n');
-  */
 
   // restore common registers
   asm volatile(

@@ -6,6 +6,12 @@
 .globl _trap_entry
 .type _trapPentry function
 
+.section .ex_entry
+	la $k0, _trap_entry
+	jr $k0
+	nop
+
+.section .text
 _trap_entry:
 # pusha, save all user registers
     lui		$k0, %hi(_stack_pointer)

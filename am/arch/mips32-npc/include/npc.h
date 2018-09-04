@@ -1,24 +1,36 @@
 #ifndef __NPC_H__
 #define __NPC_H__
 
-#define VMEM_ADDR ((volatile void *)0x50000000)
+#define EBASE 0xbfc00000
+
+/* ====================vga================== */
+#define VMEM_ADDR ((volatile void *)0xb0400000)
 #define SCR_WIDTH 400
 #define SCR_HEIGHT 300
 #define SCR_SIZE (SCR_WIDTH * SCR_HEIGHT)
-#define SERIAL_PORT ((volatile char *)0x40001000)
+
+/* ====================serial================== */
+#define SERIAL_PORT ((volatile char *)0xbfe50000)
 #define Rx 0x0
 #define Tx 0x04
 #define STAT 0x08
 #define CTRL 0x0c
+
+/* ====================keyboard================== */
 #define SCANCODE 0x10
 #define SCANCODE_STAT 0x14
-#define GPIO_TRAP ((volatile char *)0x40000000)
+
+/* ====================gpio================== */
+#define GPIO_TRAP ((volatile char *)0xb0000000)
+
+/* ====================schedule================== */
 #define HZ 50000000
-#define MAX_MEMORY_SIZE 0x4000000
 #define INTERVAL 300000
-#define REAL_TIMER_BASE ((volatile char *)0x41c00000)
-#define INT_TIMER_BASE ((volatile char *)0x41c10000)
-#define PERF_COUNTER_BASE ((volatile char *)0xc0000000)
+
+/* ====================timer================== */
+// #define REAL_TIMER_BASE ((volatile char *)0x41c00000)
+// #define INT_TIMER_BASE ((volatile char *)0x41c10000)
+// #define PERF_COUNTER_BASE ((volatile char *)0xc0000000)
 
 typedef struct {
 	uint32_t IE   : 1;
@@ -90,10 +102,10 @@ typedef struct {
 #define EXC_TRAP    13
 
 #define MFC0(dst, src, sel) \
-asm volatile("nop; nop; nop; mfc0 %0, $"_STR(src)", %1; nop; nop; nop\n\t":"=r"(dst):"i"(sel))
+asm volatile("mfc0 %0, $"_STR(src)", %1; nop\n\t":"=r"(dst):"i"(sel))
 
 #define MTC0(dst, src, sel) \
-asm volatile("nop; nop; mtc0 %0, $"_STR(dst)", %1; nop; nop\n\t"::"g"(src),"i"(sel))
+asm volatile("mtc0 %0, $"_STR(dst)", %1; nop\n\t"::"g"(src),"i"(sel))
 
 #define _STR(x) _VAL(x)
 #define _VAL(x) #x
