@@ -2,7 +2,7 @@
 #include <regdef.h>
 #include <cpu_cde.h>
 
-#define TEST_NUM 92
+#define TEST_NUM 93
 
 #define EXT_8TO16(t2, t3) \
 
@@ -543,6 +543,8 @@ inst_test:
     jal n91_ds_cache_miss       #ds_cache_miss
     nop
     jal n92_cache_flush         #cache flush instr
+    nop
+    jal n93_pref         #pref prefetch instructoin
     nop
 
 test_end:
