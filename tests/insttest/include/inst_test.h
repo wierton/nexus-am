@@ -3,7 +3,7 @@
 
 inst_error:
 	li k0, 1
-	lui v0,0x4000
+	li v0,GPIO_ADDR
 	sb  k0,0(v0)
 1:  b 1b
 	nop

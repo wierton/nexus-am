@@ -17,18 +17,21 @@ _start:
 	j main
 	nop
 
+# tlb refill exception entry
 tlb_ex_entry:
 la k0, tlb_refill_ex
 jr k0
 nop
 tlb_ex_entry_end:
 
+# usual exception entry
 usual_ex_entry:
 la k0, exception_vector_entry
 jr k0
 nop
 usual_ex_entry_end:
 
+# interrupt entry
 intr_ex_entry:
 la k0, exception_vector_entry
 jr k0
