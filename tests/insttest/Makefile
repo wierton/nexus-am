@@ -7,8 +7,9 @@ ifneq ($(ARCH),mips32-npc)
 $(error "The only allowed arch is mips32-npc")
 endif
 
-CFLAGS := -D_KERNEL -fno-builtin -nostdinc -nostdlib
+CFLAGS  = -D_KERNEL -fno-builtin -nostdinc -nostdlib
 CFLAGS += -EL -O2 -mno-abicalls -g -Iinclude -I.
+# CFLGAS += -DHAS_TLB
 
 .DEAULT_GOAL = all
 

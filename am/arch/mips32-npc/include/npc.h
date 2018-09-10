@@ -1,7 +1,7 @@
 #ifndef __NPC_H__
 #define __NPC_H__
 
-#define EBASE 0xbfc00000
+#define EBASE ((void *)0xbfc00000)
 
 /* ====================vga================== */
 #define VMEM_ADDR ((volatile void *)0xb0400000)

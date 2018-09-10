@@ -6,7 +6,7 @@
 .globl _trap_entry
 .type _trapPentry function
 
-.section .ex_entry
+.section .ex_entry.2
 	la $k0, _trap_entry
 	jr $k0
 	nop

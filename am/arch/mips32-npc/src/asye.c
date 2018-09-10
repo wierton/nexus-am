@@ -31,21 +31,30 @@ static void init_timer(int step) {
   MTC0(CP0_COMPARE, compare, 0);
 }
 
-void set_handler(unsigned offset, void *addr, int size) {
-  uint8_t *dst = (void *)(EBASE + offset);
-  for(int i = 0; i < size; i++) {
-	dst[i] = ((uint8_t*)addr)[i];
-  }
+static inline void set_handler(unsigned offset, void *addr, int size) {
+  memcpy(EBASE + offset, addr, size);
+}
+
+void *get_exception_entry() {
+  static uint8_t __attribute__((unused, section(".ex_entry.1"))) data[0];
+  return (void *)data;
+}
+
+uint32_t get_exception_entry_size() {
+  static uint8_t __attribute__((unused, section(".ex_entry.3"))) data[0];
+  return (void  *)data - get_exception_entry();
 }
 
 int _asye_init(_RegSet* (*l)(_Event ev, _RegSet *regs)){
   H = l; // set asye handler
 
-  extern int _ex_entry, _ex_entry_size;
-  set_handler(0x000, &_ex_entry, _ex_entry_size); // TLB
-  set_handler(0x180, &_ex_entry, _ex_entry_size); // EXCEPTION
-  set_handler(0x200, &_ex_entry, _ex_entry_size); // INTR
-  set_handler(0x380, &_ex_entry, _ex_entry_size); // LOONGSON
+  void *entry = get_exception_entry();
+  uint32_t size = get_exception_entry_size();
+
+  set_handler(0x000, entry, size); // TLB
+  set_handler(0x180, entry, size); // EXCEPTION
+  set_handler(0x200, entry, size); // INTR
+  set_handler(0x380, entry, size); // LOONGSON
   return 0;
 }
 

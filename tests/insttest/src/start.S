@@ -2,7 +2,7 @@
 #include <regdef.h>
 #include <cpu_cde.h>
 
-#define TEST_NUM 93
+#define TEST_NUM 95
 
 #define EXT_8TO16(t2, t3) \
 
@@ -68,14 +68,14 @@ tlb_refill_ex:
 
 tlbwr_ex:
     li v1, 0x1
-    beq k0, v1, tlbwr_allbit
+    beq t2, v1, tlbwr_allbit
     nop
     li v1, 0x3
-    beq k0, v1, tlbwr_asid
+    beq t2, v1, tlbwr_asid
     nop
     addiu t0, 0x0001
     addiu t1, 0x0001
-    addiu k0, 0x0001
+    addiu t2, 0x0001
     j tlbwr_return
     nop
 tlbwr_allbit:
@@ -93,7 +93,7 @@ tlbwr_return:
     tlbwr
     lui v1, 0xed08
     ori v1, 0xdc15
-    add v1, v1, k0
+    add v1, v1, t2
     .set mips32
     eret
     .set mips1
@@ -547,8 +547,18 @@ inst_test:
     nop
     jal n92_cache_flush         #cache flush instr
     nop
-    jal n93_pref         #pref prefetch instructoin
+	li t0, DADDR(0000)
+	sw t0, 0(t0)
+    jal n93_pref                #pref prefetch instructoin
     nop
+#ifdef HAS_TLB
+    jal n94_tlbwi               #tlbwi
+    nop
+    jal n95_tlbwr               #tlbwr
+    nop
+#else
+	addiu s3, s3, 2
+#endif
 
 test_end:
     LI  (s0, TEST_NUM)
