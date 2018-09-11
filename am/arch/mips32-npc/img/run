@@ -3,4 +3,4 @@
 # Put your ssh public key on board to really enjoy one-key running!
 
 DIR=${AM_HOME}/am/arch/mips32-npc/img
-$MIPS32_NEMU_HOME/build/nemu -b -i $@.bin
+$MIPS32_NEMU_HOME/build/nemu -b -e $@

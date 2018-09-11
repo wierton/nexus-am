@@ -3,14 +3,14 @@ MEMORY {
 }
 
 SECTIONS {
-  .ex_entry : {
-	KEEP(*(SORT(.ex_entry*))) ;
-  } > ddr
   .text : {
     *(loader)
     *(.text)
     etext = .;
     _etext = .;
+  } > ddr
+  .ex_entry : {
+	KEEP(*(SORT(.ex_entry*))) ;
   } > ddr
   .data : {
     *(.data)

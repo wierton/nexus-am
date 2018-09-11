@@ -42,6 +42,10 @@ int strncmp(const char* s1, const char* s2, size_t n){
 
 
 void* memset(void* v,int c,size_t n){
+  for(; n > 0; v ++, n --) *(char *)v = c;
+  return v;
+
+  /*
   c &= 0xff;
   uint32_t c2 = (c << 8) | c;
   uint32_t c4 = (c2 << 16) | c2;
@@ -49,6 +53,7 @@ void* memset(void* v,int c,size_t n){
   int n_align = n & ~0xf;
 
   int i;
+  for(; (uintptr_t)v & 0x7; v++) { *(char *)v = c; }
   // TODO: adjust 'v' to be 8-byte align to avoid unalign accesses on MIPS
   for (i = 0; i < n_align; i += 16) {
     *(uint64_t *)(v + i    ) = c8;
@@ -60,6 +65,7 @@ void* memset(void* v,int c,size_t n){
   }
 
   return v;
+  */
 }
 
 void* memmove(void* dst,const void* src,size_t n){
