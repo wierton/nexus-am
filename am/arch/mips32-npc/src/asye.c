@@ -45,8 +45,17 @@ uint32_t get_exception_entry_size() {
   return (void  *)data - get_exception_entry();
 }
 
+static inline void setup_bev() {
+  cp0_status_t c0_status;
+  asm volatile("mfc0 %0, $12" :: "r"(c0_status));
+  c0_status.BEV = 1;
+  asm volatile("mtc0 %0, $12" :: "r"(c0_status));
+}
+
 int _asye_init(_RegSet* (*l)(_Event ev, _RegSet *regs)){
   H = l; // set asye handler
+
+  setup_bev();
 
   void *entry = get_exception_entry();
   uint32_t size = get_exception_entry_size();

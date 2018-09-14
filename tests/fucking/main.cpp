@@ -7066,8 +7066,10 @@ uint32_t color_buf[] = {
 
 int main() {
   _ioe_init();
-  draw_rect((uint32_t*)color_buf, 0, 0, 400, 300);
-  draw_sync();
+  while(1) {
+	draw_rect((uint32_t*)color_buf, 0, 0, 400, 300);
+	draw_sync();
+  }
   _halt(0);
   return 0;
 }
