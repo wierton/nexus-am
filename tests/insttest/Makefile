@@ -9,7 +9,7 @@ endif
 
 CFLAGS  = -D_KERNEL -fno-builtin -nostdinc -nostdlib
 CFLAGS += -EL -O2 -mno-abicalls -g -Iinclude -I.
-# CFLGAS += -DHAS_TLB
+CFLAGS += -DHAS_TLB
 
 .DEAULT_GOAL = all
 

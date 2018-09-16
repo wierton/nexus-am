@@ -38,6 +38,21 @@ jr k0
 nop
 intr_ex_entry_end:
 
+# a0: st, a1: ed
+flush_cache:
+	sltu    v0,a0,a1
+	beqz    v0,2f
+	nop
+1:	cache   0x10,0(a0)
+	cache   0x15,0(a0)
+	addiu   a0,a0,4
+	sltu    v0,a0,a1
+	bnez    v0,1b
+	nop
+2:	jr      ra
+	nop
+	nop
+
 # a1: st, a1:ed, a2:target
 setup_handler:
 	sltu    v0,a0,a1
@@ -331,6 +346,7 @@ ex_ret:
 main:
 	.set noreorder
 
+#   no need to flush cache
 #   setup tlbrefill exception handler
 	la a0, tlb_ex_entry
 	la a1, tlb_ex_entry_end
