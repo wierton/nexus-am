@@ -42,7 +42,7 @@ int strncmp(const char* s1, const char* s2, size_t n){
 
 
 void* memset(void* v,int c,size_t n){
-  for(; n > 0; v ++, n --) *(char *)v = c;
+  for(char *p = v; n > 0; p ++, n --) *(char *)p = c;
   return v;
 
   /*

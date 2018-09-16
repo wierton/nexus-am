@@ -1,6 +1,6 @@
 .extern irq_handle
 .extern _halt
-.extern _stack_pointer
+.extern am_kstack
 .set noat
 
 .globl _trap_entry
@@ -14,8 +14,8 @@
 .section .text
 _trap_entry:
 # pusha, save all user registers
-    lui		$k0, %hi(_stack_pointer)
-    ori		$k0, %lo(_stack_pointer) // set kern stack
+    lui		$k0, %hi(am_kstack)
+    ori		$k0, %lo(am_kstack) // set kern stack
 	addiu	$k0, $k0,-184
 	sw 		$at, 0x4($k0)
 	sw 		$v0, 0x8($k0)

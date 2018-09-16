@@ -5,6 +5,8 @@
 
 static _RegSet* (*H) (_Event, _RegSet*) = NULL;
 
+uint8_t am_kstack[16 * 1024];
+
 #if 0
 void print_timer() {
   int compare = 0;
@@ -132,6 +134,11 @@ void irq_handle(struct _RegSet *regs){
     case EXC_TRAP:
       ev.event = _EVENT_SYSCALL;
       break;
+	case EXC_TLBM:
+	case EXC_TLBL:
+	case EXC_TLBS:
+		ev.event = _EVENT_PAGEFAULT;
+		break;
     case EXC_AdEL:
     case EXC_AdES:
     case EXC_BP:
@@ -152,6 +159,7 @@ void irq_handle(struct _RegSet *regs){
   asm volatile(
 	".set noat;"
     "nop;"
+	"mthi $0; mtlo $0; li $k0, 0; li $k1, 0;" // for diff
     "lw $at, %0;"  "lw $v0, %1;"
     "lw $a0, %2;"  "lw $a1, %3;"  "lw $a2, %4;" "lw $a3, %5;"
     "lw $t0, %6;"  "lw $t1, %7;"  "lw $t2, %8;" "lw $t3, %9;"
