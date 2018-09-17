@@ -33,8 +33,16 @@ static void init_timer(int step) {
   MTC0(CP0_COMPARE, compare, 0);
 }
 
+static inline void flush_cache(void *begin, void *end) {
+  for(void *p = begin; p < end; p += 4) {
+	asm volatile("cache 0x10,0(%0)" ::"r"(p));
+	asm volatile("cache 0x15,0(%0)" ::"r"(p));
+  }
+}
+
 static inline void set_handler(unsigned offset, void *addr, int size) {
   memcpy(EBASE + offset, addr, size);
+  flush_cache(EBASE + offset, EBASE + offset + size);
 }
 
 void *get_exception_entry() {
@@ -49,9 +57,18 @@ uint32_t get_exception_entry_size() {
 
 static inline void setup_bev() {
   cp0_status_t c0_status;
-  asm volatile("mfc0 %0, $12" :: "r"(c0_status));
+  asm volatile("mfc0 %0, $%1" :: "r"(c0_status), "i"(CP0_STATUS));
   c0_status.BEV = 1;
-  asm volatile("mtc0 %0, $12" :: "r"(c0_status));
+  asm volatile("mtc0 %0, $%1" :: "r"(c0_status), "i"(CP0_STATUS));
+}
+
+static inline void enable_interrupt() {
+  cp0_status_t c0_status;
+  asm volatile("mfc0 %0, $%1" :: "r"(c0_status), "i"(CP0_STATUS));
+  c0_status.IM  = 0xFF;
+  c0_status.ERL = 0;
+  c0_status.IE  = 1;
+  asm volatile("mtc0 %0, $%1" :: "r"(c0_status), "i"(CP0_STATUS));
 }
 
 int _asye_init(_RegSet* (*l)(_Event ev, _RegSet *regs)){
@@ -86,6 +103,7 @@ _RegSet *_make(_Area kstack, void (*entry)(void *), void *args){
 
 void _yield(){
   init_timer(INTERVAL);
+  // enable_interrupt();
   asm volatile("nop; li $a0, -1; syscall; nop");
 }
 
