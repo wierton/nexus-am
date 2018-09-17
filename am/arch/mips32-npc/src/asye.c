@@ -159,7 +159,6 @@ void irq_handle(struct _RegSet *regs){
   asm volatile(
 	".set noat;"
     "nop;"
-	"mthi $0; mtlo $0; li $k0, 0; li $k1, 0;" // for diff
     "lw $at, %0;"  "lw $v0, %1;"
     "lw $a0, %2;"  "lw $a1, %3;"  "lw $a2, %4;" "lw $a3, %5;"
     "lw $t0, %6;"  "lw $t1, %7;"  "lw $t2, %8;" "lw $t3, %9;"
@@ -199,6 +198,7 @@ void irq_handle(struct _RegSet *regs){
     "mtc0 $k0, $7;"  // mtc0 base
     "nop;"
     "nop;"
+	"mthi $0; mtlo $0; li $k0, 0; li $k1, 0;" // for diff
     "lw $v1, %2;" // used by assembler, must be load at last
     "eret;"
     : : 

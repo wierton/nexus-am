@@ -13,9 +13,29 @@
 
 .section .text
 _trap_entry:
+	mfc0	$k0, $14     # read c0_epc
+	nop
+	lui     $k1,0xe000
+	and     $k1,$k0,$k1
+	lui     $k0,0x8000
+	addu    $k1,$k1,$k0
+	sltiu   $k1,$k1,1
+	bnez	$k1, use_sp  # judge if exception in kernel mode
+	nop
+
+use_kstack:
 # pusha, save all user registers
     lui		$k0, %hi(am_kstack)
     ori		$k0, %lo(am_kstack) // set kern stack
+	b		save_gpr
+	nop
+
+use_sp:
+	addiu	$k0, $sp, 0
+	b		save_gpr
+	nop
+
+save_gpr:
 	addiu	$k0, $k0,-184
 	sw 		$at, 0x4($k0)
 	sw 		$v0, 0x8($k0)
