@@ -6,6 +6,7 @@
 static _RegSet* (*H) (_Event, _RegSet*) = NULL;
 
 uint8_t am_kstack[16 * 1024];
+uint32_t am_kstack_size = sizeof(am_kstack);
 
 #if 0
 void print_timer() {
@@ -216,7 +217,6 @@ void irq_handle(struct _RegSet *regs){
     "mtc0 $k0, $7;"  // mtc0 base
     "nop;"
     "nop;"
-	"mthi $0; mtlo $0; li $k0, 0; li $k1, 0;" // for diff
     "lw $v1, %2;" // used by assembler, must be load at last
     "eret;"
     : : 

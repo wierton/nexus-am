@@ -1,6 +1,7 @@
 .extern irq_handle
 .extern _halt
 .extern am_kstack
+.extern am_kstack_size
 .set noat
 
 .globl _trap_entry
@@ -25,8 +26,10 @@ _trap_entry:
 
 use_kstack:
 # pusha, save all user registers
-    lui		$k0, %hi(am_kstack)
-    ori		$k0, %lo(am_kstack) // set kern stack
+    la		$k0, am_kstack
+    la		$k1, am_kstack_size // set kern stack
+	lw		$k1, 0($k1)
+	addu	$k0, $k0, $k1
 	b		save_gpr
 	nop
 
