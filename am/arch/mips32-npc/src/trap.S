@@ -7,6 +7,25 @@
 .globl _trap_entry
 .type _trapPentry function
 
+#define CP0_INDEX        0
+#define CP0_RANDOM       1
+#define CP0_ENTRY_LO0    2
+#define CP0_ENTRY_LO1    3
+#define CP0_CONTEXT      4  // maintained by kernel
+#define CP0_PAGEMASK     5
+#define CP0_WIRED        6
+#define CP0_BASE         7  // for extra debug and segment
+#define CP0_BADVADDR     8
+#define CP0_COUNT        9
+#define CP0_ENTRY_HI     10
+#define CP0_COMPARE      11
+#define CP0_STATUS       12
+#define CP0_CAUSE        13
+#define CP0_EPC          14
+#define CP0_PRID         15 // sel = 0
+#define CP0_EBASE        15 // sel = 1
+#define CP0_CONFIG       16
+
 .section .ex_entry.2
 	la $k0, _trap_entry
 	jr $k0
@@ -39,7 +58,7 @@ use_sp:
 	nop
 
 save_gpr:
-	addiu	$k0, $k0,-184
+	addiu	$k0, $k0,-0xa0
 	sw 		$at, 0x4($k0)
 	sw 		$v0, 0x8($k0)
 	sw 		$v1, 0xc($k0)
@@ -76,34 +95,14 @@ save_gpr:
 
 	nop
 	nop
-	mfc0	$k0, $14
-	nop
-	nop
-	sw		$k0, 0x80($sp)
-	nop
-	nop
-	mfc0	$k0, $13
-	nop
-	nop
-	sw		$k0, 0x84($sp)
-	nop
-	nop
-	mfc0	$k0, $12
-	nop
-	nop
-	sw		$k0, 0x88($sp)
-	nop
-	nop
-	mfc0	$k0, $8
-	nop
-	nop
-	sw		$k0, 0x8c($sp)
-	nop
-	nop
-	mfc0	$k0, $7
-	nop
-	nop
-	sw		$k0, 0x90($sp)
+	mfc0 $k0, $CP0_EPC;     nop; sw $k0, 0x80($sp); nop;
+	mfc0 $k0, $CP0_CAUSE;   nop; sw $k0, 0x84($sp); nop;
+	mfc0 $k0, $CP0_STATUS;  nop; sw $k0, 0x88($sp); nop;
+	mfc0 $k0, $CP0_BADVADDR;nop; sw	$k0, 0x8c($sp); nop;
+	mfc0 $k0, $CP0_BASE;    nop; sw	$k0, 0x90($sp); nop;
+
+	mfhi $k0; sw $k0, 0x94($sp); nop
+	mflo $k0; sw $k0, 0x98($sp); nop
 # give trapframe pointer to a0
 	addiu   $a0, $sp, 0x4
 # jmp to irq_handle

@@ -183,6 +183,7 @@ typedef struct {
 #define CP0_PAGEMASK     5
 #define CP0_WIRED        6
 #define CP0_RESERVED     7  // for extra debug and segment
+#define CP0_BASE         7  // for extra debug and segment
 #define CP0_BADVADDR     8
 #define CP0_COUNT        9
 #define CP0_ENTRY_HI     10

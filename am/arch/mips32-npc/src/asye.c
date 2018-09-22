@@ -104,8 +104,8 @@ _RegSet *_make(_Area kstack, void (*entry)(void *), void *args){
 
 void _yield(){
   init_timer(INTERVAL);
-  // enable_interrupt();
-  asm volatile("nop; li $a0, -1; syscall; nop");
+  enable_interrupt();
+  asm volatile("nop; mthi $0; mtlo $0; li $a0, -1; syscall; nop");
 }
 
 int _intr_read() {
@@ -177,26 +177,24 @@ void irq_handle(struct _RegSet *regs){
   // restore common registers
   asm volatile(
 	".set noat;"
-    "nop;"
-    "lw $at, %0;"  "lw $v0, %1;"
-    "lw $a0, %2;"  "lw $a1, %3;"  "lw $a2, %4;" "lw $a3, %5;"
-    "lw $t0, %6;"  "lw $t1, %7;"  "lw $t2, %8;" "lw $t3, %9;"
-    "lw $t4, %10;" "lw $t5, %11;" "lw $t6, %12;" "lw $t7, %13;"
-    "lw $s0, %14;" "lw $s1, %15;" "lw $s2, %16;" "lw $s3, %17;"
-    "lw $s4, %18;" "lw $s5, %19;" "lw $s6, %20;" "lw $s7, %21;"
-    "lw $t8, %22;" "lw $t9, %23;"
-    "lw $gp, %24;" "lw $fp, %25;" "lw $ra, %26;" "lw $sp, %27;"
+    "lw $v0, %[v0];" "lw $at, %[at];"
+    "lw $a0, %[a0];" "lw $a1, %[a1];" "lw $a2, %[a2];" "lw $a3, %[a3];"
+    "lw $t0, %[t0];" "lw $t1, %[t1];" "lw $t2, %[t2];" "lw $t3, %[t3];"
+    "lw $t4, %[t4];" "lw $t5, %[t5];" "lw $t6, %[t6];" "lw $t7, %[t7];"
+    "lw $s0, %[s0];" "lw $s1, %[s1];" "lw $s2, %[s2];" "lw $s3, %[s3];"
+    "lw $s4, %[s4];" "lw $s5, %[s5];" "lw $s6, %[s6];" "lw $s7, %[s7];"
+    "lw $t8, %[t8];" "lw $t9, %[t9];"
+    "lw $gp, %[gp];" "lw $fp, %[fp];" "lw $ra, %[ra];" "lw $sp, %[sp];"
     : : 
-    "m"(ret->at), "m"(ret->v0),
-    "m"(ret->a0), "m"(ret->a1), "m"(ret->a2), "m"(ret->a3),
-    "m"(ret->t0), "m"(ret->t1), "m"(ret->t2), "m"(ret->t3),
-    "m"(ret->t4), "m"(ret->t5), "m"(ret->t6), "m"(ret->t7),
-    "m"(ret->s0), "m"(ret->s1), "m"(ret->s2), "m"(ret->s3),
-    "m"(ret->s4), "m"(ret->s5), "m"(ret->s6), "m"(ret->s7),
-    "m"(ret->t8), "m"(ret->t9),
-    "m"(ret->gp), "m"(ret->fp), "m"(ret->ra), "m"(ret->sp)
-    :"at",
-     "v0",
+    [v0]"m"(ret->v0), [at]"m"(ret->at),
+    [a0]"m"(ret->a0), [a1]"m"(ret->a1), [a2]"m"(ret->a2), [a3]"m"(ret->a3),
+    [t0]"m"(ret->t0), [t1]"m"(ret->t1), [t2]"m"(ret->t2), [t3]"m"(ret->t3),
+    [t4]"m"(ret->t4), [t5]"m"(ret->t5), [t6]"m"(ret->t6), [t7]"m"(ret->t7),
+    [s0]"m"(ret->s0), [s1]"m"(ret->s1), [s2]"m"(ret->s2), [s3]"m"(ret->s3),
+    [s4]"m"(ret->s4), [s5]"m"(ret->s5), [s6]"m"(ret->s6), [s7]"m"(ret->s7),
+    [t8]"m"(ret->t8), [t9]"m"(ret->t9),
+    [gp]"m"(ret->gp), [fp]"m"(ret->fp), [ra]"m"(ret->ra), [sp]"m"(ret->sp)
+    :"v0","at",
      "a0","a1","a2","a3",
      "t0","t1","t2","t3",
      "t4","t5","t6","t7",
@@ -205,23 +203,19 @@ void irq_handle(struct _RegSet *regs){
      "fp","ra","sp"
     );
 
-  // restore cp0 registers
   asm volatile(
-    "lw $k0, %0;"   // ld epc to k0
-    "nop;"
-    "nop;"
-    "mtc0 $k0, $14;" // mtc0 epc
-    "nop;"
-    "nop;"
-    "lw $k0, %1;"   // ld base t0 k0
-    "mtc0 $k0, $7;"  // mtc0 base
-    "nop;"
-    "nop;"
-    "lw $v1, %2;" // used by assembler, must be load at last
-    "eret;"
-    : : 
-    "m"(ret->epc),
-    "m"(ret->base),
-    "m"(ret->v1)
+    "lw $k0, %[epc];  nop; mtc0 $k0, $%[epc_no];  nop;"
+    "lw $k0, %[base]; nop; mtc0 $k0, $%[base_no]; nop;"
+	"lw $k0, %[hi]; mthi $k0; nop;"
+	"lw $k0, %[lo]; mtlo $k0; nop;"
+    "lw $v1, %[v1];"
+	"eret;"
+	: :
+    [epc]"m"(ret->epc),
+    [base]"m"(ret->base),
+    [hi]"m"(ret->hi), [lo]"m"(ret->lo),
+    [v1]"m"(ret->v1),
+	[epc_no]"i"(CP0_EPC),
+	[base_no]"i"(CP0_BASE)
 	);
 }
