@@ -14,7 +14,7 @@ Makefile.%: tests/%.c latest
 	-@rm -f Makefile.$*
 
 #cancel rules included by $(AM_HOME)/Makefile.check
-image: ;
+# image: ;
 default $(MAKECMDGOALS): all ;
 
 clean:
