@@ -7,7 +7,7 @@ AM_SRCS := $(ISA)/npc/trm.c \
            nemu-devices/nemu-video.c \
            $(ISA)/nemu/boot/start.S
 
-LD_SCRIPT := $(AM_HOME)/am/src/$(ISA)/nemu/boot/loader.ld
+LD_SCRIPT := $(AM_HOME)/am/src/$(ISA)/npc/boot/loader.ld
 
 image:
 	@echo + LD "->" $(BINARY_REL).elf
