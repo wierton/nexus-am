@@ -2,6 +2,9 @@ include $(AM_HOME)/am/arch/isa/mips32.mk
 
 AM_SRCS := $(ISA)/npc/trm.c \
            nemu-devices/ioe.c \
+           $(ISA)/nemu/trap.S \
+           $(ISA)/nemu/cte.c \
+           $(ISA)/nemu/vme.c \
            nemu-devices/nemu-timer.c \
            $(ISA)/npc/devices/keyboard.c \
            nemu-devices/nemu-video.c \

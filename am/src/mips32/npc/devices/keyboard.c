@@ -64,7 +64,7 @@ int normal_scancode[256] = {
     [0x4C] = _KEY_SEMICOLON,
     [0x4D] = _KEY_P,
     [0x4E] = _KEY_MINUS,
-    // [0x52] = _KEY_QUOTE,
+    /* [0x52] = _KEY_QUOTE, */
     [0x54] = _KEY_LEFTBRACKET,
     [0x55] = _KEY_EQUALS,
     [0x58] = _KEY_CAPSLOCK,
@@ -82,12 +82,13 @@ int normal_scancode[256] = {
     [0x73] = _KEY_5,
     [0x74] = _KEY_6,
     [0x75] = _KEY_8,
-    [0x76] = _KEY_ESCAPE, // [0x77] = _KEY_NUMLOCK,
+    [0x76] = _KEY_ESCAPE,
+    /* [0x77] = _KEY_NUMLOCK, */
     [0x78] = _KEY_F11,
-    // [0x79] = _KEY_PLUS,
+    /* [0x79] = _KEY_PLUS, */
     [0x7A] = _KEY_3,
     [0x7B] = _KEY_MINUS,
-    // [0x7C] = _KEY_KP_MULTIPLY,
+    /* [0x7C] = _KEY_KP_MULTIPLY, */
     [0x7D] = _KEY_9,
     [0x83] = _KEY_F7,
 };
